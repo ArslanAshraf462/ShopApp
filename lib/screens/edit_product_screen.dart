@@ -10,6 +10,15 @@ class EditProductScreen extends StatefulWidget {
 class _EditProductScreenState extends State<EditProductScreen> {
   final _priceFocusNode = FocusNode();
   final _descriptionFocusNode = FocusNode();
+  final _imageUrlController = TextEditingController();
+
+  @override
+  void dispose() {
+    _priceFocusNode.dispose();
+    _descriptionFocusNode.dispose();
+    _imageUrlController.dispose();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,6 +57,42 @@ class _EditProductScreenState extends State<EditProductScreen> {
                 maxLines: 3,
                 keyboardType: TextInputType.multiline,
                 focusNode: _descriptionFocusNode,
+                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Container(
+                      height: 100.0,
+                      width: 100.0,
+                      margin: EdgeInsets.only(
+                        top: 8.0,
+                        right: 10.0,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          width: 1.0,
+                          color: Colors.grey,
+                        )
+                      ),
+                      child: _imageUrlController.text.isEmpty
+                      ? Text('Enter a URL')
+                      : FittedBox(
+                        child: Image.network(_imageUrlController.text,
+                        fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: TextFormField(
+                        decoration: InputDecoration(
+                          labelText: 'Image URL',
+                        ),
+                        keyboardType: TextInputType.url,
+                        textInputAction: TextInputAction.done,
+                        controller: _imageUrlController,
+                      ),
+                    ),
+                  ],
                 ),
             ],
           ),),
