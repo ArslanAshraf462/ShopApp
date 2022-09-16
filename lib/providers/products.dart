@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shop_app/providers/product.dart';
+import 'package:http/http.dart' as http;
 
 class Products with ChangeNotifier{
   List<Product> _items = [
@@ -67,7 +69,16 @@ class Products with ChangeNotifier{
   }
 
   void addProduct(Product product){
-    // _items.add(value);
+    const url = 'https://httprequest-4a03b-default-rtdb.firebaseio.com/products.json';
+    http.post(Uri.parse(url),body: json.encode({
+      'title' :  product.title,
+      'description' :product.description,
+      'imageUrl': product.imageUrl,
+      'price' : product.price,
+      'isFavorite' :product.isFavorite,
+    })).then((response) {
+
+      // _items.add(value);
     final newProduct = Product(
       id: DateTime.now().toString(), 
       title: product.title, 
@@ -77,6 +88,8 @@ class Products with ChangeNotifier{
       _items.add(newProduct);
       //_items.insert(0,newProduct); at the start of the list
     notifyListeners();
+    });
+    
   }
 
   void updateProduct(String id, Product newProduct){
