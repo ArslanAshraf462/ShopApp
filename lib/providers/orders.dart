@@ -23,6 +23,34 @@ class Orders with ChangeNotifier {
     return [..._orders];
   }
 
+  Future<void> fetchAndSetOrders() async{
+    const url = 'https://httprequest-4a03b-default-rtdb.firebaseio.com/orders.json';
+    final response = await http.get(Uri.parse(url));
+    final List<OrderItem> loadedOrders = [];
+    final extractedData = json.decode(response.body) as Map<String, dynamic>;
+    if(extractedData == null){
+      return;
+    }
+    extractedData.forEach((orderId, orderData) {
+      loadedOrders.add(OrderItem(
+        id: orderId, 
+        amount: orderData['amount'], 
+        products: (orderData['products'] as List<dynamic>).map((item) => 
+        CartItem(
+          id: item['id'], 
+          title: item['title'], 
+          price: item['price'], 
+          quantity: item['quantity'],
+          ),
+          ).toList(), 
+        dateTime: DateTime.parse(orderData['datetime']),
+       ), 
+       );
+     });
+     _orders = loadedOrders.reversed.toList();
+     notifyListeners();
+  }
+
   Future<void> addOrder(List<CartItem> cartProducts, double total) async{
     const url = 'https://httprequest-4a03b-default-rtdb.firebaseio.com/orders.json';
     final timestamp = DateTime.now();
