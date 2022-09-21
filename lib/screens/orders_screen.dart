@@ -12,32 +12,45 @@ class OrdersScreen extends StatefulWidget {
 }
 
 class _OrdersScreenState extends State<OrdersScreen> {
-var _isLoading=false;
+  Future? _ordersFuture;
+  Future _obtainOrdersFuture(){
+    return Provider.of<Orders>(context,listen: false).fetchAndSetOrders();
+  }
   @override
-  void initState() {
-    Future.delayed(Duration.zero).then((_) async{
-      setState(() {
-        _isLoading=true;
-      });
-      await Provider.of<Orders>(context,listen: false).fetchAndSetOrders();
-      setState(() {
-        _isLoading=false;
-      });
-    });
-    super.initState();
+  void setState(VoidCallback fn) {
+    _ordersFuture=_obtainOrdersFuture();
+    super.setState(fn);
   }
   @override
   Widget build(BuildContext context) {
-    final ordersData = Provider.of<Orders>(context);
+   // final ordersData = Provider.of<Orders>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('Your Orders'),
       ),
       drawer: AppDrawer(),
-      body: _isLoading ? Center(child: CircularProgressIndicator(),) : ListView.builder(
+      body: FutureBuilder(
+        future: _ordersFuture,
+        builder: (context, dataSnapshot) {
+        if(dataSnapshot.connectionState == ConnectionState.waiting){
+          return Center(child: CircularProgressIndicator(),);
+        }
+        else{
+          if(dataSnapshot.hasError == null){
+            //Do Some error handling here
+            return Center(child: Text('An error occured!'),);
+          }
+          else{
+            return Consumer<Orders>(builder: (context, ordersData, child) {
+              return ListView.builder(
         itemCount: ordersData.orders.length,
         itemBuilder: (context, index) => OrderItem(ordersData.orders[index]),
-        ),
+        );
+            },);
+          }
+        }
+      },
+      ),
     );
   }
 }
